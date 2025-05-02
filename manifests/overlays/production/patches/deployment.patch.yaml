@@ -1,19 +1,19 @@
 # RabbitMQ
 
 - op: add
-  path: /spec/template/spec/containers/1/env/-
+  path: /spec/template/spec/containers/0/env/-
   value:
     name: GCP_PROJECT_ID
     value: "gcp-automated-blog-prod"
 
 - op: add
-  path: /spec/template/spec/containers/1/env/-
+  path: /spec/template/spec/containers/0/env/-
   value:
     name: INSTANCE_NAME
     value: "autoblog-prod-bastion-host"
 
 - op: add
-  path: /spec/template/spec/containers/1/env/-
+  path: /spec/template/spec/containers/0/env/-
   value:
     name: REMOTE_HOST
     value: "b-579f1012-97c3-4d23-b747-0a15c3e2676f.mq.eu-west-1.on.aws"
