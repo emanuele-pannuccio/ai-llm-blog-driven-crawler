@@ -1,0 +1,40 @@
+# deployment.yaml (modificato)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: feed-crawler-deployment
+  labels:
+    app: feed-crawler-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: feed-crawler-app
+  template:
+    metadata:
+      labels:
+        app: feed-crawler-app
+    spec:
+      serviceAccountName: blog-feed-crawler-sa
+      containers:
+        - name: blog-ai-aws-tunnel-rabbitmq
+          image: aws-image
+          imagePullPolicy: Always
+          env:
+            - name: REMOTE_PORT
+              value: "5671"
+            - name: LOCAL_PORT
+              value: "15671"
+            - name: AWS_REGION
+              value: "eu-west-1"
+            - name: AWS_ACCESS_KEY_ID_SECRET
+              value: "blog-feed-crawler-aws-access-key-id"
+            - name: AWS_SECRET_ACCESS_KEY_SECRET
+              value: "blog-feed-crawler-aws-secret-access-key"
+
+        - name: feed-crawler
+          image: app-image
+          imagePullPolicy: Always
+          envFrom:
+            - configMapRef:
+                name: feed-crawler-config

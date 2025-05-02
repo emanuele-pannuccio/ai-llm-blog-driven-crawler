@@ -1,0 +1,13 @@
+services:
+  spider:
+    build: .
+    environment:
+      - SPIDER_NAME=aws-feed
+      - SCRAPE_INTERVAL=3600
+      - MONGO_URI=mongodb+srv://autoblog-mongo:KcNjapi7vudFnGiP@ing-sis-dist.jsjoj8n.mongodb.net/?retryWrites=true&w=majority&appName=ing-sis-dist
+      - MONGO_DATABASE=automated-blog
+      - RABBITMQ_HOST=172.28.144.128
+      - RABBITMQ_PORT=15671
+      - RABBITMQ_USERNAME=autoblog-user
+      - RABBITMQ_PASSWORD=autoblog-user!
+      - RABBITMQ_QUEUE=scrapy_items

@@ -1,0 +1,5 @@
+scrapy
+pika
+pymongo
+xmltodict
+google-cloud-secret-manager

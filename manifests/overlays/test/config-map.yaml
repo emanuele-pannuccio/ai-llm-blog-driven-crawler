@@ -1,0 +1,8 @@
+# config-map.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: feed-crawler-config
+data:
+  SPIDER_NAME: aws-feed
+  SCRAPE_INTERVAL: "86400"
