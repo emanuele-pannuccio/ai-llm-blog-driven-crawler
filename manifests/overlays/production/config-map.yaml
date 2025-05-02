@@ -6,3 +6,4 @@ metadata:
 data:
   SPIDER_NAME: aws-feed
   SCRAPE_INTERVAL: "86400"
+  GCP_PROJECT_ID: "gcp-automated-blog-prod"
