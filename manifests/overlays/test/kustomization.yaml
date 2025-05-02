@@ -7,4 +7,4 @@ patches:
   - path: ./patches/deployment.patch.yaml
     target:
       kind: Deployment
-      name: blog-ai-agent-deployment
+      name: feed-crawler-deployment
