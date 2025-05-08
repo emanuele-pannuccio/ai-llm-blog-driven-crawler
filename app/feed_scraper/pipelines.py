@@ -22,6 +22,8 @@ class MongoDBPipeline:
 
     @classmethod
     def __access_secret(cls, secret_id, project_id, version_id="latest"):
+        if os.environ.get("LOCAL_DEBUG"):
+            return json.dumps({"mongo_uri" : "mongodb+srv://autoblog-mongo:KcNjapi7vudFnGiP@ing-sis-dist.jsjoj8n.mongodb.net/?retryWrites=true&w=majority&appName=ing-sis-dist", "mongo_database": "automated-blog"})
         client = secretmanager.SecretManagerServiceClient()
         name = f"projects/{project_id}/secrets/{secret_id}/versions/{version_id}"
         response = client.access_secret_version(request={"name": name})
@@ -60,7 +62,7 @@ class MongoDBPipeline:
             upsert=True
         )
         
-        # Verifica se il documento è stato modificato
+        # # Verifica se il documento è stato modificato
         # if not ( result.modified_count > 0 or result.upserted_id is not None ):
         #     raise DropItem("Missing specified keywords.")
             
@@ -76,6 +78,17 @@ class RabbitMQPipeline:
         return cls()
 
     def __access_secret(self, secret_id, project_id, version_id="latest"):
+        if os.environ.get("LOCAL_DEBUG"):
+            if secret_id == "rabbit-connection":
+                return json.dumps({
+                    "rabbitmq_protocol" : "amqp",
+                    "rabbitmq_host" : "localhost",
+                    "rabbitmq_queue" : "scrapy_items",
+                    "rabbitmq_port" : "5672",
+                    "rabbitmq_username" : "guest",
+                    "rabbitmq_password" : "guest"
+                })
+            
         client = secretmanager.SecretManagerServiceClient()
         name = f"projects/{project_id}/secrets/{secret_id}/versions/{version_id}"
         response = client.access_secret_version(request={"name": name})
@@ -83,34 +96,36 @@ class RabbitMQPipeline:
 
     def __create_rabbit_mq(
         self, 
+        rabbitmq_protocol,
         rabbitmq_host,
         rabbitmq_queue,
         rabbitmq_port,
         rabbitmq_username,
         rabbitmq_password
     ):
-        return f"amqps://{rabbitmq_username}:{rabbitmq_password}@{rabbitmq_host}:{rabbitmq_port}"
+        return f"{rabbitmq_protocol}://{rabbitmq_username}:{rabbitmq_password}@{rabbitmq_host}:{rabbitmq_port}"
 
     def open_spider(self, spider):
         # Leggi i parametri dalle variabili d'ambiente
         gcp_project_id = os.environ.get("GCP_PROJECT_ID", "gcp-automated-blog-test")
         rabbit_mq_conn_secret = os.environ.get("GCP_RABBIT_MQ_SECRET", "rabbit-connection")
-        rabbit_mq_credentials = json.loads(self.__access_secret(rabbit_mq_conn_secret, gcp_project_id))
+        self.rabbit_mq_credentials = json.loads(self.__access_secret(rabbit_mq_conn_secret, gcp_project_id))
 
-        # Connessione a RabbitMQ
-        ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
-        ssl_context.set_ciphers('ECDHE+AESGCM:!ECDSA')
 
-        url = self.__create_rabbit_mq(**rabbit_mq_credentials)
+        url = self.__create_rabbit_mq(**self.rabbit_mq_credentials)
         parameters = pika.URLParameters(url)
-        parameters.ssl_options = pika.SSLOptions(context=ssl_context)
+        if os.environ.get("LOCAL_DEBUG") is None:
+            # Connessione a RabbitMQ
+            ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
+            ssl_context.set_ciphers('ECDHE+AESGCM:!ECDSA')
+            parameters.ssl_options = pika.SSLOptions(context=ssl_context)
 
         max_retries = 5
         for attempt in range(max_retries):
             try:
                 self.connection = pika.BlockingConnection(parameters)
                 self.channel = self.connection.channel()
-                self.channel.queue_declare(queue=rabbit_mq_credentials['rabbitmq_queue'], durable=True)
+                self.channel.queue_declare(queue=self.rabbit_mq_credentials['rabbitmq_queue'], durable=True)
                 break  # Successo, esci dal ciclo
             except pika.exceptions.AMQPConnectionError as e:
                 if attempt < max_retries - 1:
@@ -125,7 +140,7 @@ class RabbitMQPipeline:
         # Invia il messaggio a RabbitMQ
         self.channel.basic_publish(
             exchange='',
-            routing_key=os.getenv('RABBITMQ_QUEUE', 'scrapy_items'),
+            routing_key=self.rabbit_mq_credentials['rabbitmq_queue'],
             body=message,
             properties=pika.BasicProperties(
                 delivery_mode=2,  # Make message persistent
