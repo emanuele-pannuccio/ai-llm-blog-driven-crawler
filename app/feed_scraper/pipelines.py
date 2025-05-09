@@ -73,6 +73,8 @@ class RabbitMQPipeline:
         self.connection = None
         self.channel = None
 
+    #
+
     @classmethod
     def from_crawler(cls, crawler):
         return cls()
