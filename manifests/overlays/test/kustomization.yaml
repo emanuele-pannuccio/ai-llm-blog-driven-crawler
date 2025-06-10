@@ -8,3 +8,8 @@ patches:
     target:
       kind: Deployment
       name: feed-crawler-deployment
+
+  - path: ./patches/service-account.patch.yaml
+    target:
+      kind: ServiceAccount
+      name: blog-be-sa
