@@ -12,4 +12,4 @@ patches:
   - path: ./patches/service-account.patch.yaml
     target:
       kind: ServiceAccount
-      name: blog-be-sa
+      name: blog-feed-crawler-sa
