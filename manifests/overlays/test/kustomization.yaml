@@ -9,7 +9,5 @@ patches:
       kind: Deployment
       name: feed-crawler-deployment
 
-  - path: ./patches/service-account.patch.yaml
-    target:
-      kind: ServiceAccount
-      name: blog-feed-crawler-sa
+# patchesStrategicMerge:
+#   - ./patches/service-account.patch.yaml

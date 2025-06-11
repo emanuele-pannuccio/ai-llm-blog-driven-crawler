@@ -27,11 +27,10 @@ spec:
               value: "15671"
             - name: AWS_REGION
               value: "eu-west-1"
-            - name: AWS_ACCESS_KEY_ID_SECRET
-              value: "blog-feed-crawler-aws-access-key-id"
-            - name: AWS_SECRET_ACCESS_KEY_SECRET
-              value: "blog-feed-crawler-aws-secret-access-key"
-
+            - name: GCP_OAUTH_AUD
+              value: "116903481623271744248"
+            - name: AWS_ROLE_ARN
+              value: "arn:aws:iam::460446231952:role/autoblog-test-gcp-116903481623271744248"
         - name: feed-crawler
           image: app-image
           imagePullPolicy: Always
